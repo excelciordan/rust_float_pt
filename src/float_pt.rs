@@ -21,12 +21,12 @@ fn fpsub(left:Fpnum, right:Fpnum, dest:&Fpnum) {
 }
 
 #[allow(dead_code, unused_variables)]
-fn extract_sign( from:Fpnum ) -> u32 {
+pub fn extract_sign( from:Fpnum ) -> u32 {
     return from >> 31;  // shift the HO bit to the LO bit
 }
 
 #[allow(dead_code, unused_variables)]
-fn extract_exponent( from:Fpnum ) -> u32 {
+pub fn extract_exponent( from:Fpnum ) -> u32 {
     // let mask:u32 = 0xff; // Note that this is the same as 0x000000ff
     // let mut exponent:u32 = from >> 23; // drop mantisa
     // exponent = exponent & mask;
@@ -41,7 +41,7 @@ fn extract_exponent( from:Fpnum ) -> u32 {
 }
 
 #[allow(dead_code, unused_variables)]
-fn extract_mantisa( from:Fpnum ) -> u32 {
+pub fn extract_mantisa( from:Fpnum ) -> u32 {
     // let mask:u32 = 0x711111; // 0b0000_0000_0111_1...1 (23 ones)
     // if (from & mask) == 0 {return 0}    // make sure to return 0 if zero
     // let implied_bit:u32 = 0x800000;   // implied 24 bit (always one)

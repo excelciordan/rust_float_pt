@@ -1,3 +1,5 @@
+extern crate floatpt;
+
 fn main() {
     /* Okay, this is a software implementation of IEEE 32 bit (short) Floating Point
        FP is a 32 bit number with the HO bit being a sign bit, followed by 8-bit
@@ -9,5 +11,5 @@ fn main() {
        The final thing to remember.  There are special numbers when the exponent is
        all 0 or all 1.  We will cover this later when dealing with the numbers
     */
-    
+
 }
