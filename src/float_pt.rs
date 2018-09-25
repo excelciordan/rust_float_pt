@@ -7,25 +7,22 @@ macro_rules! asFpnum {
     ( x => $e:expr ) => ( $e as f32 )
 }
 
-#[allow(dead_code, unused_variables)]
-fn fpadd(left:Fpnum, right:Fpnum, dest:&Fpnum) {
+#[allow(unused_variables)]
+pub fn fpadd(left:Fpnum, right:Fpnum, dest:&Fpnum) {
 
 }
 
 // Remeber that Floating Pt numbers are in ones compliment, therefore subtraction
 // is the same as inverting the HO (sign) bit and adding
-#[allow(dead_code, unused_variables)]
-fn fpsub(left:Fpnum, right:Fpnum, dest:&Fpnum) {
+pub fn fpsub(left:Fpnum, right:Fpnum, dest:&Fpnum) {
     let temp_right = right ^ 0x80000000;  // Invert HO bit
     fpadd(left, temp_right, dest);
 }
 
-#[allow(dead_code, unused_variables)]
 pub fn extract_sign( from:Fpnum ) -> u32 {
     return from >> 31;  // shift the HO bit to the LO bit
 }
 
-#[allow(dead_code, unused_variables)]
 pub fn extract_exponent( from:Fpnum ) -> u32 {
     // let mask:u32 = 0xff; // Note that this is the same as 0x000000ff
     // let mut exponent:u32 = from >> 23; // drop mantisa
@@ -37,10 +34,9 @@ pub fn extract_exponent( from:Fpnum ) -> u32 {
     // return ((from >> 23) & mask) - 127;
     
     // No vars added to stack
-    return ((from >> 23) & 0xff) - 127; // no assignment
+    return ((from >> 23) & 0xff as u32) - 127; // no assignment
 }
 
-#[allow(dead_code, unused_variables)]
 pub fn extract_mantisa( from:Fpnum ) -> u32 {
     // let mask:u32 = 0x711111; // 0b0000_0000_0111_1...1 (23 ones)
     // if (from & mask) == 0 {return 0}    // make sure to return 0 if zero
@@ -48,12 +44,41 @@ pub fn extract_mantisa( from:Fpnum ) -> u32 {
     // return (from & mask) | implied_bit; // add back in the implied one
     
     // In 2 lines, no need to put new vars on the stack
-    if (from & 0x7fffff) == 0 {return 0}
-    return (from & 0x7fffff) | 0x8000000
+    if (from & 0x7fffff as u32) == 0 {return 0}
+    return (from & 0x7fffff as u32) | 0x800000
 }
 
-#[allow(dead_code, unused_variables)]
-fn shift_and_round(num_to_shift:Fpnum, num_shifts:i32) -> Fpnum {
+pub fn shift_and_round(num_to_shift:&Fpnum, num_shifts:&Fpnum) -> Fpnum {
+    /* This is the author's solution 
+        This very well may have less ops than mine, especially if a cpu does not have
+        a barrel processor
+    */
+    
+    //mask bits to check for a "sticky" bit
+    let masks:[Fpnum; 24] = [
+        0, 1, 3, 7, 0xf, 0x1f, 0x3f, 0x7f,
+        0xff, 0x1ff, 0x3ff, 0x7ff, 0xfff, 0x1fff, 0x3fff, 0x7fff,
+        0xffff, 0x1ffff, 0x3ffff, 0x7ffff, 0xfffff, 0x1fffff, 0x3fffff,
+        0x7fffff
+    ];
+
+    //HO masks out the the HO bit of the value masked by the masks entry
+    let ho_masks:[Fpnum; 24] = [
+        0x0, 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80,
+        0x100, 0x200, 0x400, 0x800, 0x1000, 0x2000, 0x4000,
+        0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000,
+        0x200000, 400000
+    ];
+
+    // Shifted out holds the value that will be shifted out of the mantisa
+    let mut shifted_out:u32;
+    assert!(*num_shifts <= 23); //Make sure that the shifts won't make the number 0
+    
+
+    return 1 as u32;
+}
+
+pub fn shift_and_round_my_solution(num_to_shift: &Fpnum, num_shifts: &u32) -> Fpnum {
     // Initial choice is i32 becuase if we implemnt shift left than the sign can be used as a direction indicator
     /* Oooo boy! 
         This is a dusey, REMEMBER shifting right is the same as dividing by 2.  We need to decrement the exp
@@ -67,10 +92,32 @@ fn shift_and_round(num_to_shift:Fpnum, num_shifts:i32) -> Fpnum {
         3. If the last bit out is the only 1 and the LO bit is 1, round up, else truncate
 
         Let the fun begin
+
+        This is my solution to the problem.  The auther of write great code instead
+        uses an array of masks.  That way he skips the bit shifts and just does the &.
+
+        In "modern" processors, there is probably not a big diff in time, however, not
+        all processors have a barrel shifter (multiple bits shifted in one op) so this
+        solution is good, but not great
     */
 
+    assert!(*num_shifts <= 23); //Make sure that the shifts won't make the number 0
 
-    return 1 as Fpnum;  // placeholder to make the ide happy
+    // We want the last bit shifted out, not the lo bit, hence the -1
+    if (num_to_shift >> num_shifts - 1) & 1 == 0 {
+        return num_to_shift >> num_shifts;
+    }
+
+    for i in 0..num_shifts - 2 { // we only care about the bits before the last shifted out
+        if (num_to_shift >> i) & 1 == 1 {
+            return (num_to_shift >> num_shifts) + 1;
+        }
+    }
+
+    if (num_to_shift >> num_shifts) & 1 == 1 { // the LO bit is 1 and the last_out is 1
+        return (num_to_shift >> num_shifts) + 1;
+    }
+    return num_to_shift >> num_shifts;
 }
 
 #[cfg(test)]
