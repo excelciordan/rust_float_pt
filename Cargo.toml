@@ -1,6 +1,6 @@
 [package]
 name = "floatpt"
 version = "0.1.0"
-authors = ["dguimaraes"]
+authors = ["Excelsior Dan"]
 
 [dependencies]
