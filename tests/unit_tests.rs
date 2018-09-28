@@ -18,28 +18,36 @@ fn test_extract_mantisa() {
 
 #[test]
 fn test_shift_and_round_lo_zero() {
-    let num_to_shift: u32 = 0xf81000;
+    let mut num_to_shift: u32 = 0xf01000;
     let num_shifts: u32 = 20;
-    assert_eq!(14, floatpt::float_pt::shift_and_round(&num_to_shift, &num_shifts));
+    let num_shifted = num_to_shift >> num_shifts;
+    floatpt::float_pt::shift_and_round(&mut num_to_shift, &num_shifts);
+    assert_eq!(num_shifted, num_to_shift);
 }
 
 #[test]
 fn test_shift_and_round_lo_one_last_bit_shifted_one() {
-    let num_to_shift: u32 = 0xf81000;
+    let mut num_to_shift: u32 = 0xf80000;
     let num_shifts: u32 = 20;
-    assert_eq!(16, floatpt::float_pt::shift_and_round(&num_to_shift, &num_shifts));
+    let num_shifted = (num_to_shift >> num_shifts) + 1;
+    floatpt::float_pt::shift_and_round(&mut num_to_shift, &num_shifts);
+    assert_eq!(num_shifted, num_to_shift);
 }
 
 #[test]
 fn test_shift_and_round_lo_one_last_bit_shifted_zero() {
-    let num_to_shift: u32 = 0xf81000;
+    let mut num_to_shift: u32 = 0xf70000;
     let num_shifts: u32 = 20;
-    assert_eq!(15, floatpt::float_pt::shift_and_round(&num_to_shift, &num_shifts));
+    let num_shifted = num_to_shift >> num_shifts;
+    floatpt::float_pt::shift_and_round(&mut num_to_shift, &num_shifts);
+    assert_eq!(num_shifted, num_to_shift);
 }
 
 #[test]
 fn test_shift_and_round_last_bit_shifted_one_with_another_one() {
-    let num_to_shift: u32 = 0xf81000;
+    let mut num_to_shift: u32 = 0xe80000;
     let num_shifts: u32 = 20;
-    assert_eq!(16, floatpt::float_pt::shift_and_round(&num_to_shift, &num_shifts));
+    let num_shifted = num_to_shift >> num_shifts;
+    floatpt::float_pt::shift_and_round(&mut num_to_shift, &num_shifts);
+    assert_eq!(num_shifted, num_to_shift);
 }

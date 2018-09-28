@@ -48,7 +48,7 @@ pub fn extract_mantisa( from:Fpnum ) -> u32 {
     return (from & 0x7fffff as u32) | 0x800000
 }
 
-pub fn shift_and_round(num_to_shift:&Fpnum, num_shifts:&Fpnum) -> Fpnum {
+pub fn shift_and_round(num_to_shift:&mut Fpnum, num_shifts:&Fpnum) {
     /*  This is the my attempt at the author's solution 
         It is a very good solution, but it has a couple if statemets to many, also, the
         authors solution points out that I miss understood the 3 conditions, specifcally
@@ -75,7 +75,8 @@ pub fn shift_and_round(num_to_shift:&Fpnum, num_shifts:&Fpnum) -> Fpnum {
     let shifted_out:u32 = *num_to_shift & masks[*num_shifts as usize];
     assert!(*num_shifts <= 23); //Make sure that the shifts won't make the number 0
 
-    // 1. If last out is 0, truncate
+    *num_to_shift = *num_to_shift >> *num_shifts;
+
     /* Okay, quick Rust aside, indexies of arrays or slices are of type usize
         usize is the number of bytes it takes to reference any pint in memory
         this means that if your process is 64bit, the usize is 8 bytes and
@@ -84,23 +85,15 @@ pub fn shift_and_round(num_to_shift:&Fpnum, num_shifts:&Fpnum) -> Fpnum {
         num_shits is a ref to a 32 bit unsigned number, hence we need to cast
         as a usize
      */
-    if *num_to_shift & ho_masks[(*num_shifts + 1) as usize] == 0 {
-        return *num_to_shift >> *num_shifts;
+    // If decimal is greater than half way to the next num, round
+    if shifted_out > ho_masks[*num_shifts as usize] {
+        *num_to_shift += 1;
     }
 
-    // 2 last out is 1 and there was another 1 shifted out
-    if *num_to_shift & ho_masks[(*num_shifts - 1) as usize] > 0 {
-        return (*num_to_shift >> *num_shifts) + 1;
+    // If it is half way, round up if lo bit of shifted is also 1
+    if shifted_out == ho_masks[*num_shifts as usize]{
+        *num_to_shift += *num_to_shift & 1;  // compare LO bit to 1
     }
-
-    // 3 last out is 1 and LO is 1 (all others out are 0)
-    if *num_to_shift & ho_masks[(*num_shifts + 1) as usize] >
-    *num_shifts & ho_masks[(*num_shifts) as usize] {
-        return (*num_to_shift >> *num_shifts) + 1;            
-    }
-    
-    // 3 last out is 1 and LO is 0 (all others out are 0)
-    return *num_to_shift >> *num_shifts;
 }
 
 pub fn shift_and_round_my_solution(num_to_shift: &Fpnum, num_shifts: &u32) -> Fpnum {
