@@ -164,9 +164,9 @@ mod tests {
 
     #[test]
     #[should_panic]
+    #[allow(overflowing_literals)]
     fn expect_one_in_ho_fail() {
         // 0x80000000 is defaulted to a i32 thus the answer is -1
-        #[allow(overflowing_literals)]
         assert_eq!(1, 0x80000000 >> 31)
     }
 
