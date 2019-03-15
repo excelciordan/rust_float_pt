@@ -12,4 +12,20 @@ fn main() {
        all 0 or all 1.  We will cover this later when dealing with the numbers
     */
     println!("There is no error");
+
+    let a:u32 = 1234;
+    let b = &a;
+    let mut c = a;
+
+    c = c + 5;
+
+    // b = *b + 5;  Cannot do because b is a ref to a and a is not mut, nor did be a mut ref to a
+    
+    println!("{} : {}", a, b);
+    println!("{} : {}", a, *b);
+
+    println!("{} : {}", a, c);
+
+    println!("{} : {}", &a, &b);
+    println!("{} : {}", &a, &c);
 }

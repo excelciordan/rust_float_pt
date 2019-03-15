@@ -8,15 +8,22 @@ macro_rules! asFpnum {
 }
 
 #[allow(unused_variables)]
-pub fn fpadd(left:Fpnum, right:Fpnum, dest:&Fpnum) {
+pub fn fpadd(left:Fpnum, right:Fpnum, dest:&mut Fpnum) {
+    // This function takes some work
+    // 1. split numbers into components (sign, mantisa, expontnet)
+    // 2. Determin larger exponent
+    // 3. get the shifted value of the larger exonent (don't forget to update the expnent)
+    // 4. add if sign bits are the same, otherwise subtract
+    // 5. shift exponent back to 1.xxx eNN
+    // 6. build proper fpnum for the mutable entry
 
 }
 
 // Remeber that Floating Pt numbers are in ones compliment, therefore subtraction
 // is the same as inverting the HO (sign) bit and adding
-pub fn fpsub(left:Fpnum, right:Fpnum, dest:&Fpnum) {
-    let temp_right = right ^ 0x80000000;  // Invert HO bit
-    fpadd(left, temp_right, dest);
+pub fn fpsub(left:Fpnum, right:Fpnum, dest:&mut Fpnum) {
+    // let temp_right = right ^ 0x80000000;  // Invert HO bit,  uneeded var
+    fpadd(left, right ^ (0x80000000 as u32), dest);
 }
 
 pub fn extract_sign( from:Fpnum ) -> u32 {
@@ -181,5 +188,16 @@ mod tests {
         let a:Fpnum = 0;
         let b = asFpnum!(x => a);
         assert_ne!(a as f32,b)
+    }
+
+    #[test]
+    fn owernship_test() {
+        let x:u32 = 1234;
+        let a = &x;
+        let b = *a >> 5;
+
+        // assert_eq!(b, *a >> 5);
+        // assert_eq!(1234 as u32, x);
+        assert_eq!(b, a >> 5);  // This should break because a is a ptr
     }
 }
